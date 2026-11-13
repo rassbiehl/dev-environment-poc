@@ -1,6 +1,6 @@
 {
   "name": "dev-environment",
-  "dockerComposeFile": "../compose.dev.yaml",
+  "dockerComposeFile": "../compose.dev.yml",
   "service": "app",
   "workspaceFolder": "/workspace",
   "customizations": {

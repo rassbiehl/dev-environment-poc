@@ -1,3 +1,4 @@
+#!/bin/sh
 
 WARNING_LINES=300
 MAX_LINES=500
@@ -10,9 +11,10 @@ CHANGED_LINES=$(git diff --cached --numstat -- . ':!package-lock.json' ':!**/pac
 ')
 
 if [ "$CHANGED_LINES" -gt "$MAX_LINES" ]; then
-  echo "WARNING: Large commit ($CHANGED_LINES changed lines). Consider splitting it."
+  echo "ERROR: Commit exceeds $MAX_LINES lines ($CHANGED_LINES changed). Consider splitting it."
+  exit 1
 elif [ "$CHANGED_LINES" -ge "$WARNING_LINES" ]; then
-  echo "WARNING: Commit approaching recommended size ($CHANGED_LINES changed lines)."
+  echo "WARNING: Commit is approaching $MAX_LINES lines ($CHANGED_LINES changed)."
 fi
 
 exit 0
