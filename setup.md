@@ -1,141 +1,111 @@
-1. Create frontend (React + TypeScript + Vite)
-   Fra repository root:
-   npm create vite@latest frontend -- --template react-ts
-   cd frontend
-   npm install
-   npm install tailwindcss @tailwindcss/vite
-   npm install -D prettier
-   cd ..
+# Development Environment Setup
 
-Vite React + TypeScript-templaten inkluderer normalt ESLint.
+Use this guide to copy the development tooling from the proof-of-concept repository into a new, empty project with the same frontend/backend structure.
 
-Konfigurér frontend/vite.config.ts:
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import tailwindcss from '@tailwindcss/vite';
+## 1. Copy the configuration files
 
-export default defineConfig({
-plugins: [react(), tailwindcss()],
-});
+Copy these files and directories from the test project:
 
-Tilføj i frontend/src/index.css:
-@import 'tailwindcss';
-
-2. Create backend (Node.js + TypeScript)
-   Fra repository root:
-   mkdir backend
-   cd backend
-   npm init -y
-   npm install -D typescript @types/node
-   npm install -D eslint @eslint/js typescript-eslint globals
-   npm install -D prettier
-   npx tsc --init
-   cd ..
-
-npm install genererer automatisk package-lock.json. Derfor er dit tidligere trin med npm install --package-lock-only overflødigt. 3. Configure backend ESLint
-Opret backend/eslint.config.mjs:
-import js from '@eslint/js';
-import tseslint from 'typescript-eslint';
-import globals from 'globals';
-
-export default tseslint.config(
-{
-ignores: ['dist/**', 'coverage/**'],
-},
-js.configs.recommended,
-...tseslint.configs.recommended,
-{
-files: ['**/*.{js,mjs,ts}'],
-languageOptions: {
-globals: globals.node,
-},
-},
-);
-
-Tilføj følgende scripts i backend/package.json:
-{
-"scripts": {
-"lint": "eslint .",
-"lint:fix": "eslint . --fix",
-"format": "prettier --write .",
-"format:check": "prettier --check ."
-}
-}
-
-Behold øvrige eksisterende scripts.
-
-Tilføj også format og format:check til frontend/package.json. Frontend har normalt allerede et lint script. 4. Configure Prettier
-Opret én fælles .prettierrc.json i repository root:
-{
-"semi": true,
-"singleQuote": true,
-"trailingComma": "all",
-"tabWidth": 2,
-"printWidth": 100
-}
-
-Opret .prettierignore i root:
-**/node_modules/
-**/dist/
-**/coverage/
-
-Det sikrer samme formatting på frontend og backend. 5. Configure VS Code
-Opret .vscode/settings.json:
-{
-"editor.defaultFormatter": "esbenp.prettier-vscode",
-"editor.formatOnSave": true,
-"editor.codeActionsOnSave": {
-"source.fixAll.eslint": "explicit"
-}
-}
-
-Tilføj extensions til .devcontainer/devcontainer.json:
-{
-"name": "dev-environment",
-"dockerComposeFile": "../compose.dev.yaml",
-"service": "app",
-"workspaceFolder": "/workspace",
-"customizations": {
-"vscode": {
-"extensions": [
-"esbenp.prettier-vscode",
-"dbaeumer.vscode-eslint"
-]
-}
-}
-}
-
-Nu installeres de to VS Code-extensions automatisk i Dev Container. 6. Verify ESLint and Prettier
-Fra repository root:
-npm --prefix frontend run lint
-npm --prefix backend run lint
-
-npm --prefix frontend run format:check
-npm --prefix backend run format:check
-
-Første gang kan format:check rapportere filer, der endnu ikke er formatteret. Kør da npm --prefix frontend run format og tilsvarende for backend. 7. Verify project structure
-dev-environment-poc/
+```text
+project/
 ├── .devcontainer/
-│ ├── Dockerfile
-│ └── devcontainer.json
+│   ├── Dockerfile
+│   └── devcontainer.json
+├── .husky/
+│   ├── pre-commit
+│   └── commit-msg
 ├── .vscode/
-│ └── settings.json
+│   └── settings.json
 ├── frontend/
-│ ├── src/
-│ ├── eslint.config.js
-│ ├── vite.config.ts
-│ ├── package.json
-│ └── package-lock.json
+│   ├── package.json
+│   ├── package-lock.json
+│   └── vitest.config.ts
 ├── backend/
-│ ├── eslint.config.mjs
-│ ├── tsconfig.json
-│ ├── package.json
-│ └── package-lock.json
-├── .prettierrc.json
+│   ├── package.json
+│   ├── package-lock.json
+│   └── vitest.config.mts
+├── scripts/
+│   └── check-commit-size.sh
+├── .gitignore
 ├── .prettierignore
-├── compose.dev.yaml
-└── Makefile
+├── .prettierrc.json
+├── compose.dev.yml
+├── eslint.config.mjs
+├── lint-staged.config.mjs
+├── commitlint.config.mjs
+├── Makefile
+├── package.json
+└── package-lock.json
+```
 
-8. Commit dependencies
-   git add .
-   git commit -m "Initialize frontend and backend development tooling"
+Copy the relevant `tsconfig` files, test setup files, and application scaffolding as needed. Do not copy `node_modules`.
+
+## 2. Check the Dev Container configuration
+
+Make sure `.devcontainer/devcontainer.json` references the correct Compose filename, service, and workspace path. For example, if the Compose file is named `compose.dev.yml`, do not reference `compose.dev.yaml`.
+
+Open the project in VS Code, then run **Dev Containers: Reopen in Container** from the Command Palette.
+
+## 3. Install dependencies
+
+From the project root, inside the Dev Container:
+
+```bash
+npm ci
+npm --prefix frontend ci
+npm --prefix backend ci
+```
+
+`npm ci` installs dependencies using the committed lockfiles. There is no need to repeat the original `npm install` commands.
+
+## 4. Set up Git hooks
+
+If the new project is not already a Git repository:
+
+```bash
+git init
+```
+
+Make sure the root `package.json` contains the Husky prepare script:
+
+```json
+{
+  "scripts": {
+    "prepare": "husky"
+  }
+}
+```
+
+If Husky was not initialized during installation, run:
+
+```bash
+npm run prepare
+```
+
+The hooks should run ESLint on staged source files, run frontend/backend tests with coverage, warn about large commits, and validate commit messages with Commitlint. Keep Prettier on save in VS Code rather than in pre-commit.
+
+## 5. Verify the setup
+
+```bash
+npm run lint
+npm run test:coverage
+```
+
+Also verify that frontend and backend start using their configured `dev` scripts.
+
+## 6. Test the commit hooks
+
+Stage a real change and create a valid Conventional Commit:
+
+```bash
+git add .
+git commit -m "chore: configure development environment"
+```
+
+The pre-commit hook should run linting and tests. The commit-msg hook should reject invalid commit messages.
+
+## 7. Commit the configuration
+
+Commit and push the configuration files and all three sets of `package.json` / `package-lock.json`. Other developers can then clone the repository, open the Dev Container, and install dependencies with `npm ci`.
+
+**Note:** Keep the Node.js version fixed in the Dockerfile for a consistent environment. If the real project uses different paths or service names, update the copied configuration before running it.

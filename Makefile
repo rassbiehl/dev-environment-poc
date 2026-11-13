@@ -1,4 +1,4 @@
-.PHONY: frontend backend lint lint-fix format format-check test coverage check help
+.PHONY: frontend backend lint lint-fix format format-check test coverage check help commit-convention
 
 help:
 	@echo "Available commands:"
@@ -37,3 +37,16 @@ coverage:
 	npm run test:coverage
 
 check: lint format-check test
+
+commit-convention:
+	@echo ""
+	@echo "Commit message convention:"
+	@echo ""
+	@echo "  <type>: <imperative verb> <description>"
+	@echo ""
+	@echo "Examples:"
+	@echo "  feat: add user authentication"
+	@echo "  fix: resolve login validation issue"
+	@echo "  refactor: simplify API client"
+	@echo "  chore: update development dependencies"
+	@echo ""
