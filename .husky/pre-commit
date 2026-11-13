@@ -1,0 +1,5 @@
+npx lint-staged
+npm --prefix frontend run test:unit
+npm --prefix backend run test:unit
+npm run test:coverage
+sh scripts/check-commit-size.sh
