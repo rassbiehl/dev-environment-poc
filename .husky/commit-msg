@@ -1,1 +1,6 @@
-npx --no -- commitlint --edit "$1"
+if ! npx --no -- commitlint --edit "$1"; then
+  echo ""
+  echo "ERROR: Invalid commit message."
+  echo "Run 'make commit-convention' to see the required format."
+  exit 1
+fi
